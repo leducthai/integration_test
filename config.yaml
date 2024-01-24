@@ -1,0 +1,6 @@
+mariadb_connection:
+  db_name: odoo_report_test
+  db_user: gsi_admin
+  db_password: bA9b2pSXs4Av
+  db_host: docker02.gbcvn2.local
+  db_port: 3333
