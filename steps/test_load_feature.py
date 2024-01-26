@@ -6,7 +6,7 @@ from pytest_bdd import scenarios, given, when, then, parsers
 import pytest
 
 
-from composer import RequestData
+import services
 import flagging
 import caller
 
@@ -31,17 +31,21 @@ def walk_get_path(path):
 
     return feature_files
 
-def load_all_scenarios(root_path):
-    
-    for file_path in walk_get_path(root_path):
-        scenarios(file_path)
 
-load_all_scenarios(flagging.args.data)
+for file_path in walk_get_path(flagging.args.data):
+    scenarios(file_path)
+
+
+# scenarios("./features/test.feature")
+
+class Context:
+    def __init__(self) -> None:
+        self.variable = {}
 
 
 @pytest.fixture
 def context():
-    return {"your": "context_data"}
+    return Context()
 
 @given("I do nothing")
 def do_noting():
@@ -49,16 +53,16 @@ def do_noting():
     
 @given(parsers.parse("I create an API {request_method:w} request"))
 def set_up_api_request(context, request_method):
-    req_data = RequestData()
+    req_data = services.RequestData()
     req_data.set_method(request_method)
     context.variables = {}
     context.variable["rq_data"] = req_data
     
-@given(parsers.parse("the endpoint is {endpoint:w}"))
+@given(parsers.parse("the endpoint is '{endpoint}'"))
 def set_up_endpoint(context, endpoint):
     req_data = context.variable.get("rq_data")
     if not req_data:
-        req_data = RequestData()
+        req_data = services.RequestData()
         
     req_data.set_url(flagging.args.host + endpoint)
     context.variable["rq_data"] = req_data
@@ -67,16 +71,24 @@ def set_up_endpoint(context, endpoint):
 def set_up_headers(context):
     req_data = context.variable.get("rq_data")
     if not req_data:
-        req_data = RequestData()
+        req_data = services.RequestData()
+    
+    headers_table = context.table
+    
+    headers = {}
+    for row in headers_table:
+        key = row["Key"]
+        value = row["Value"]
+        headers[key] = value
         
-    req_data.set_headers(dict(context.table))
+    req_data.set_headers(headers)
     context.variable["rq_data"] = req_data
     
 @given(parsers.parse("the request params are"))
 def set_up_params(context, ):
     req_data = context.variable.get("rq_data")
     if not req_data:
-        req_data = RequestData()
+        req_data = services.RequestData()
         
     req_data.set_params(dict(context.table))
     context.variable["rq_data"] = req_data
@@ -85,7 +97,7 @@ def set_up_params(context, ):
 def send_api_request(context):
     req_data = context.variable.get("rq_data")
     if not req_data:
-        req_data = RequestData()
+        req_data = services.RequestData()
     
     c = caller.Caller(req_data)
     rspn = c()

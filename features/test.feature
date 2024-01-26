@@ -5,7 +5,7 @@ Feature: report excel
 
     Scenario: get excel report file failed
         Given I create an API POST request
-        And the endpoint is /excel/export
+        And the endpoint is '/excel/export'
         And the headers are:
         | Key         | Value                    |
         | Content-Type | application/json         |

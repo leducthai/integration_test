@@ -8,7 +8,7 @@ from caller import Caller
 from assert_call import StatusCodeAssertion
 import logger
 import flagging
-import steps.test_load_feature as test_load_feature
+import steps
 _logger = logging.getLogger(__name__)
 
 # with open("config.yaml", "br") as conf:
